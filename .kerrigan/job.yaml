@@ -12,7 +12,7 @@ source:
 
 scheduling:
   strategy: spread
-  max_devkits: 2
+  max_devkits: 4
   fail_fast: false
   pools:
     - sim-pool
