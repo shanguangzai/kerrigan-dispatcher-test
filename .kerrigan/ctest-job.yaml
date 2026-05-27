@@ -1,0 +1,49 @@
+metadata:
+  name: manual-dispatch-ctest
+  labels:
+    suite: manual
+    mode: ctest-simulation
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+  artifacts:
+    - name: ctest-runtime
+      url: https://shanguangzai.github.io/kerrigan-dispatcher-test/artifacts/ctest-runtime.tar.gz
+      sha256: 8cb4cf03f3c7bd7052ed12067c36a9c98a7ed6587ecba5f1db2952bf4aeccdca
+      extract: true
+      destination: .
+
+setup:
+  per_devkit:
+    - id: prepare-runtime
+      commands:
+        - echo "preparing ${KERRIGAN_TARGET_ID}"
+        - echo "ready ${KERRIGAN_TARGET_ID}" > "/tmp/kerrigan-prepared-${KERRIGAN_TARGET_ID}"
+      timeout_sec: 30
+
+scheduling:
+  strategy: spread
+  min_devkits: 0
+  max_devkits: 4
+  fail_fast: false
+  pools:
+    - sim-pool
+  capabilities:
+    board: modalix
+    os_type: elxr
+    firmware: 2.1.0
+
+tasks:
+  - id: ctest-core
+    type: ctest
+    test_dir: ctest-runtime/build/tests
+    selectors:
+      - ctest_shard_a
+      - ctest_shard_b
+      - ctest_shard_c
+      - ctest_shard_d
+      - ctest_shard_e
+      - ctest_shard_f
+    env:
+      KERRIGAN_CTEST_SHARD_DURATION_SEC: "10"
+    timeout_sec: 120

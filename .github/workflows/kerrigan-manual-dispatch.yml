@@ -3,57 +3,13 @@ name: Kerrigan Manual Dispatch Test
 on:
   workflow_dispatch:
     inputs:
-      min_devkits:
-        description: Minimum eligible devkits required before dispatch starts
-        type: number
-        default: 0
-      max_devkits:
-        description: Maximum devkits to use concurrently
-        type: number
-        default: 4
-      max_parallel:
-        description: Maximum concurrent tasks, use 0 to default to max_devkits
-        type: number
-        default: 0
-      shard_count:
-        description: Number of shards to run
+      manifest:
+        description: Static Kerrigan manifest to submit
         type: choice
-        options: ["1", "2", "3", "4", "5", "6"]
-        default: "6"
-      shard_duration_sec:
-        description: Sleep duration per shard
-        type: number
-        default: 10
-      suite_type:
-        description: Test suite shape to dispatch
-        type: choice
-        options: [ctest, pytest]
-        default: ctest
-      artifact_url:
-        description: CTest runtime artifact URL
-        type: string
-        default: "https://shanguangzai.github.io/kerrigan-dispatcher-test/artifacts/ctest-runtime.tar.gz"
-      artifact_sha256:
-        description: CTest runtime artifact sha256
-        type: string
-        default: "8cb4cf03f3c7bd7052ed12067c36a9c98a7ed6587ecba5f1db2952bf4aeccdca"
-      strategy:
-        description: Scheduling strategy
-        type: choice
-        options: [spread, pack, serial]
-        default: spread
-      fail_fast:
-        description: Stop queued work after first test failure
-        type: boolean
-        default: false
-      fail_shard:
-        description: Optional shard id to fail, such as manual-shard-c
-        type: string
-        default: ""
-      firmware:
-        description: Required firmware capability
-        type: string
-        default: "2.1.0"
+        options:
+          - .kerrigan/ctest-job.yaml
+          - .kerrigan/job.yaml
+        default: .kerrigan/ctest-job.yaml
       bridge_timeout_sec:
         description: Runner bridge timeout
         type: number
@@ -66,142 +22,14 @@ jobs:
       - kerrigan
     timeout-minutes: 15
     env:
-      KERRIGAN_MANIFEST: .kerrigan/generated-job.yaml
+      KERRIGAN_MANIFEST: ${{ inputs.manifest }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate Kerrigan job
-        env:
-          INPUT_MIN_DEVKITS: ${{ inputs.min_devkits }}
-          INPUT_MAX_DEVKITS: ${{ inputs.max_devkits }}
-          INPUT_MAX_PARALLEL: ${{ inputs.max_parallel }}
-          INPUT_SHARD_COUNT: ${{ inputs.shard_count }}
-          INPUT_SHARD_DURATION_SEC: ${{ inputs.shard_duration_sec }}
-          INPUT_SUITE_TYPE: ${{ inputs.suite_type }}
-          INPUT_ARTIFACT_URL: ${{ inputs.artifact_url }}
-          INPUT_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 }}
-          INPUT_STRATEGY: ${{ inputs.strategy }}
-          INPUT_FAIL_FAST: ${{ inputs.fail_fast }}
-          INPUT_FAIL_SHARD: ${{ inputs.fail_shard }}
-          INPUT_FIRMWARE: ${{ inputs.firmware }}
+      - name: Show Kerrigan manifest
         run: |
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-
-          shard_names = ["manual-shard-a", "manual-shard-b", "manual-shard-c", "manual-shard-d", "manual-shard-e", "manual-shard-f"]
-          shard_count = int(os.environ["INPUT_SHARD_COUNT"])
-          max_parallel = int(os.environ["INPUT_MAX_PARALLEL"])
-          max_devkits = int(os.environ["INPUT_MAX_DEVKITS"])
-          min_devkits = int(os.environ["INPUT_MIN_DEVKITS"])
-          fail_fast = os.environ["INPUT_FAIL_FAST"].lower() == "true"
-          duration = int(os.environ["INPUT_SHARD_DURATION_SEC"])
-          fail_shard = os.environ["INPUT_FAIL_SHARD"]
-          firmware = os.environ["INPUT_FIRMWARE"]
-          strategy = os.environ["INPUT_STRATEGY"]
-          suite_type = os.environ["INPUT_SUITE_TYPE"]
-          artifact_url = os.environ["INPUT_ARTIFACT_URL"]
-          artifact_sha256 = os.environ["INPUT_ARTIFACT_SHA256"]
-
-          lines = [
-              "metadata:",
-              "  name: manual-dispatch-generated",
-              "  labels:",
-              "    suite: manual",
-              f"    mode: {suite_type}-simulation",
-              "",
-              "source:",
-              "  repository: shanguangzai/kerrigan-dispatcher-test",
-              "",
-          ]
-          if suite_type == "ctest":
-              lines.extend([
-                  "  artifacts:",
-                  "    - name: ctest-runtime",
-                  f"      url: {artifact_url}",
-                  f"      sha256: {artifact_sha256}",
-                  "      extract: true",
-                  "      destination: .",
-                  "",
-              ])
-          else:
-              lines.extend([
-                  "  bundle:",
-                  "    include:",
-                  "      - tests/**/*.py",
-                  "",
-              ])
-          if suite_type == "ctest":
-              lines.extend([
-                  "setup:",
-                  "  per_devkit:",
-                  "    - id: prepare-runtime",
-                  "      commands:",
-                  "        - echo \"preparing ${KERRIGAN_TARGET_ID}\"",
-                  "        - echo \"ready ${KERRIGAN_TARGET_ID}\" > \"/tmp/kerrigan-prepared-${KERRIGAN_TARGET_ID}\"",
-                  "      timeout_sec: 30",
-                  "",
-              ])
-          lines.extend([
-              "scheduling:",
-              f"  strategy: {strategy}",
-              f"  min_devkits: {min_devkits}",
-              f"  max_devkits: {max_devkits}",
-          ])
-          if max_parallel > 0:
-              lines.append(f"  max_parallel: {max_parallel}")
-          lines.extend([
-              f"  fail_fast: {str(fail_fast).lower()}",
-              "  pools:",
-              "    - sim-pool",
-              "  capabilities:",
-              "    board: modalix",
-              "    os_type: elxr",
-              f"    firmware: {firmware}",
-              "",
-              "tasks:",
-          ])
-
-          if suite_type == "ctest":
-              ctest_names = [f"ctest_shard_{suffix}" for suffix in ["a", "b", "c", "d", "e", "f"][:shard_count]]
-              lines.extend([
-                  "  - id: ctest-core",
-                  "    type: ctest",
-                  "    test_dir: ctest-runtime/build/tests",
-                  "    selectors:",
-              ])
-              for selector in ctest_names:
-                  lines.append(f"      - {selector}")
-              lines.extend([
-                  "    env:",
-                  f"      KERRIGAN_CTEST_SHARD_DURATION_SEC: \"{duration}\"",
-                  "    timeout_sec: 120",
-                  "",
-              ])
-          else:
-              for name in shard_names[:shard_count]:
-                  selector = f"tests/test_slow_suite.py::test_{name.replace('-', '_')}"
-                  lines.extend([
-                      f"  - id: {name}",
-                      "    type: command",
-                      "    command:",
-                      "      argv:",
-                      "        - python3",
-                      "        - -m",
-                      "        - pytest",
-                      "        - -q",
-                      "        - -s",
-                      f"        - {selector}",
-                      "      env:",
-                      f"        KERRIGAN_SHARD_DURATION_SEC: \"{duration}\"",
-                      f"        KERRIGAN_FAIL_SHARD: \"{fail_shard}\"",
-                      "    timeout_sec: 60",
-                      "",
-                  ])
-
-          Path(".kerrigan/generated-job.yaml").write_text("\n".join(lines), encoding="utf-8")
-          print(Path(".kerrigan/generated-job.yaml").read_text(encoding="utf-8"))
-          PY
+          echo "KERRIGAN_MANIFEST=${KERRIGAN_MANIFEST}"
+          sed -n '1,220p' "${KERRIGAN_MANIFEST}"
 
       - name: Submit Kerrigan session
         run: kerrigan-runner-bridge --timeout-sec "${{ inputs.bridge_timeout_sec }}"
