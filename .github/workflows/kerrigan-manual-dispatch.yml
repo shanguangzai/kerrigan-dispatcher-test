@@ -16,7 +16,7 @@ on:
         type: number
         default: 0
       shard_count:
-        description: Number of pytest shards to run
+        description: Number of shards to run
         type: choice
         options: ["1", "2", "3", "4", "5", "6"]
         default: "6"
@@ -24,6 +24,19 @@ on:
         description: Sleep duration per shard
         type: number
         default: 10
+      suite_type:
+        description: Test suite shape to dispatch
+        type: choice
+        options: [ctest, pytest]
+        default: ctest
+      artifact_url:
+        description: CTest runtime artifact URL
+        type: string
+        default: "https://shanguangzai.github.io/kerrigan-dispatcher-test/artifacts/ctest-runtime.tar.gz"
+      artifact_sha256:
+        description: CTest runtime artifact sha256
+        type: string
+        default: "9294d633bbef54327410acd431ef4220a4f05dfc2a482c19665a98fc5cd199db"
       strategy:
         description: Scheduling strategy
         type: choice
@@ -64,6 +77,9 @@ jobs:
           INPUT_MAX_PARALLEL: ${{ inputs.max_parallel }}
           INPUT_SHARD_COUNT: ${{ inputs.shard_count }}
           INPUT_SHARD_DURATION_SEC: ${{ inputs.shard_duration_sec }}
+          INPUT_SUITE_TYPE: ${{ inputs.suite_type }}
+          INPUT_ARTIFACT_URL: ${{ inputs.artifact_url }}
+          INPUT_ARTIFACT_SHA256: ${{ inputs.artifact_sha256 }}
           INPUT_STRATEGY: ${{ inputs.strategy }}
           INPUT_FAIL_FAST: ${{ inputs.fail_fast }}
           INPUT_FAIL_SHARD: ${{ inputs.fail_shard }}
@@ -83,25 +99,44 @@ jobs:
           fail_shard = os.environ["INPUT_FAIL_SHARD"]
           firmware = os.environ["INPUT_FIRMWARE"]
           strategy = os.environ["INPUT_STRATEGY"]
+          suite_type = os.environ["INPUT_SUITE_TYPE"]
+          artifact_url = os.environ["INPUT_ARTIFACT_URL"]
+          artifact_sha256 = os.environ["INPUT_ARTIFACT_SHA256"]
 
           lines = [
               "metadata:",
               "  name: manual-dispatch-generated",
               "  labels:",
               "    suite: manual",
-              "    mode: simulation",
+              f"    mode: {suite_type}-simulation",
               "",
               "source:",
               "  repository: shanguangzai/kerrigan-dispatcher-test",
-              "  bundle:",
-              "    include:",
-              "      - tests/**/*.py",
               "",
+          ]
+          if suite_type == "ctest":
+              lines.extend([
+                  "  artifacts:",
+                  "    - name: ctest-runtime",
+                  f"      url: {artifact_url}",
+                  f"      sha256: {artifact_sha256}",
+                  "      extract: true",
+                  "      destination: .",
+                  "",
+              ])
+          else:
+              lines.extend([
+                  "  bundle:",
+                  "    include:",
+                  "      - tests/**/*.py",
+                  "",
+              ])
+          lines.extend([
               "scheduling:",
               f"  strategy: {strategy}",
               f"  min_devkits: {min_devkits}",
               f"  max_devkits: {max_devkits}",
-          ]
+          ])
           if max_parallel > 0:
               lines.append(f"  max_parallel: {max_parallel}")
           lines.extend([
@@ -116,25 +151,42 @@ jobs:
               "tasks:",
           ])
 
-          for name in shard_names[:shard_count]:
-              selector = f"tests/test_slow_suite.py::test_{name.replace('-', '_')}"
+          if suite_type == "ctest":
+              ctest_names = [f"ctest_shard_{suffix}" for suffix in ["a", "b", "c", "d", "e", "f"][:shard_count]]
               lines.extend([
-                  f"  - id: {name}",
-                  "    type: command",
-                  "    command:",
-                  "      argv:",
-                  "        - python3",
-                  "        - -m",
-                  "        - pytest",
-                  "        - -q",
-                  "        - -s",
-                  f"        - {selector}",
-                  "      env:",
-                  f"        KERRIGAN_SHARD_DURATION_SEC: \"{duration}\"",
-                  f"        KERRIGAN_FAIL_SHARD: \"{fail_shard}\"",
-                  "    timeout_sec: 60",
+                  "  - id: ctest-core",
+                  "    type: ctest",
+                  "    test_dir: ctest-runtime/build/tests",
+                  "    selectors:",
+              ])
+              for selector in ctest_names:
+                  lines.append(f"      - {selector}")
+              lines.extend([
+                  "    env:",
+                  f"      KERRIGAN_CTEST_SHARD_DURATION_SEC: \"{duration}\"",
+                  "    timeout_sec: 120",
                   "",
               ])
+          else:
+              for name in shard_names[:shard_count]:
+                  selector = f"tests/test_slow_suite.py::test_{name.replace('-', '_')}"
+                  lines.extend([
+                      f"  - id: {name}",
+                      "    type: command",
+                      "    command:",
+                      "      argv:",
+                      "        - python3",
+                      "        - -m",
+                      "        - pytest",
+                      "        - -q",
+                      "        - -s",
+                      f"        - {selector}",
+                      "      env:",
+                      f"        KERRIGAN_SHARD_DURATION_SEC: \"{duration}\"",
+                      f"        KERRIGAN_FAIL_SHARD: \"{fail_shard}\"",
+                      "    timeout_sec: 60",
+                      "",
+                  ])
 
           Path(".kerrigan/generated-job.yaml").write_text("\n".join(lines), encoding="utf-8")
           print(Path(".kerrigan/generated-job.yaml").read_text(encoding="utf-8"))
