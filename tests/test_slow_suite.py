@@ -3,9 +3,13 @@ import time
 
 
 def _run_shard(name: str) -> None:
-    target_id = os.environ["KERRIGAN_TARGET_ID"]
+    target_id = os.environ.get("KERRIGAN_TARGET_ID", "local-devkit")
+    duration = int(os.environ.get("KERRIGAN_SHARD_DURATION_SEC", "0"))
+    fail_shard = os.environ.get("KERRIGAN_FAIL_SHARD", "")
     print(f"{name} starting on {target_id}", flush=True)
-    time.sleep(10)
+    time.sleep(duration)
+    if fail_shard == name:
+        raise AssertionError(f"{name} intentionally failed on {target_id}")
     print(f"{name} completed on {target_id}", flush=True)
 
 
