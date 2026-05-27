@@ -6,6 +6,9 @@ metadata:
 
 source:
   repository: shanguangzai/kerrigan-dispatcher-test
+  bundle:
+    include:
+      - tests/**/*.py
 
 scheduling:
   strategy: spread
@@ -20,55 +23,31 @@ scheduling:
 
 tasks:
   - id: manual-shard-a
-    type: command
-    command:
-      argv:
-        - python
-        - -c
-        - "import os, time; time.sleep(10); print('manual-shard-a on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    type: pytest
+    selector: tests/test_slow_suite.py::test_manual_shard_a
     timeout_sec: 60
 
   - id: manual-shard-b
-    type: command
-    command:
-      argv:
-        - python
-        - -c
-        - "import os, time; time.sleep(10); print('manual-shard-b on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    type: pytest
+    selector: tests/test_slow_suite.py::test_manual_shard_b
     timeout_sec: 60
 
   - id: manual-shard-c
-    type: command
-    command:
-      argv:
-        - python
-        - -c
-        - "import os, time; time.sleep(10); print('manual-shard-c on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    type: pytest
+    selector: tests/test_slow_suite.py::test_manual_shard_c
     timeout_sec: 60
 
   - id: manual-shard-d
-    type: command
-    command:
-      argv:
-        - python
-        - -c
-        - "import os, time; time.sleep(10); print('manual-shard-d on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    type: pytest
+    selector: tests/test_slow_suite.py::test_manual_shard_d
     timeout_sec: 60
 
   - id: manual-shard-e
-    type: command
-    command:
-      argv:
-        - python
-        - -c
-        - "import os, time; time.sleep(10); print('manual-shard-e on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    type: pytest
+    selector: tests/test_slow_suite.py::test_manual_shard_e
     timeout_sec: 60
 
   - id: manual-shard-f
-    type: command
-    command:
-      argv:
-        - python
-        - -c
-        - "import os, time; time.sleep(10); print('manual-shard-f on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    type: pytest
+    selector: tests/test_slow_suite.py::test_manual_shard_f
     timeout_sec: 60
