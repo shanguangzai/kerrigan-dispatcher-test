@@ -1,0 +1,40 @@
+metadata:
+  name: manual-dispatch-vulcan-core-develop
+  labels:
+    suite: manual
+    mode: vulcan-staging
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+  vulcan_artifacts:
+    - env: stg
+      name: core
+      branch: develop
+      tag: latest
+      type: minimal
+      install_dir: /tmp/kerrigan-vulcan-core-develop
+      skip_devkit_sync: true
+      timeout_sec: 300
+
+scheduling:
+  strategy: spread
+  min_devkits: 1
+  max_devkits: 1
+  max_parallel: 1
+  fail_fast: true
+  pools:
+    - sim-pool
+  capabilities:
+    board: modalix
+    os_type: elxr
+    firmware: 2.1.0
+
+tasks:
+  - id: vulcan-core-develop-smoke
+    type: command
+    command:
+      shell: |
+        python -m pip show sima-cli
+        test -d /tmp/kerrigan-vulcan-core-develop
+        test -f /tmp/kerrigan-vulcan-core-develop/install_neat_framework.sh
+    timeout_sec: 30
