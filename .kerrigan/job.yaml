@@ -9,7 +9,7 @@ source:
 
 scheduling:
   strategy: spread
-  max_parallel: 2
+  max_devkits: 2
   fail_fast: false
   pools:
     - sim-pool
@@ -25,7 +25,7 @@ tasks:
       argv:
         - python
         - -c
-        - "import os, time; time.sleep(5); print('manual-shard-a on ' + os.environ['KERRIGAN_TARGET_ID'])"
+        - "import os, time; time.sleep(10); print('manual-shard-a on ' + os.environ['KERRIGAN_TARGET_ID'])"
     timeout_sec: 60
 
   - id: manual-shard-b
@@ -34,7 +34,7 @@ tasks:
       argv:
         - python
         - -c
-        - "import os, time; time.sleep(5); print('manual-shard-b on ' + os.environ['KERRIGAN_TARGET_ID'])"
+        - "import os, time; time.sleep(10); print('manual-shard-b on ' + os.environ['KERRIGAN_TARGET_ID'])"
     timeout_sec: 60
 
   - id: manual-shard-c
@@ -43,7 +43,7 @@ tasks:
       argv:
         - python
         - -c
-        - "import os, time; time.sleep(5); print('manual-shard-c on ' + os.environ['KERRIGAN_TARGET_ID'])"
+        - "import os, time; time.sleep(10); print('manual-shard-c on ' + os.environ['KERRIGAN_TARGET_ID'])"
     timeout_sec: 60
 
   - id: manual-shard-d
@@ -52,5 +52,23 @@ tasks:
       argv:
         - python
         - -c
-        - "import os, time; time.sleep(5); print('manual-shard-d on ' + os.environ['KERRIGAN_TARGET_ID'])"
+        - "import os, time; time.sleep(10); print('manual-shard-d on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    timeout_sec: 60
+
+  - id: manual-shard-e
+    type: command
+    command:
+      argv:
+        - python
+        - -c
+        - "import os, time; time.sleep(10); print('manual-shard-e on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    timeout_sec: 60
+
+  - id: manual-shard-f
+    type: command
+    command:
+      argv:
+        - python
+        - -c
+        - "import os, time; time.sleep(10); print('manual-shard-f on ' + os.environ['KERRIGAN_TARGET_ID'])"
     timeout_sec: 60
