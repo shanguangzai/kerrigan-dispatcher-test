@@ -1,0 +1,56 @@
+metadata:
+  name: manual-dispatch-smoke
+  labels:
+    suite: manual
+    mode: simulation
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+
+scheduling:
+  strategy: spread
+  max_parallel: 2
+  fail_fast: false
+  pools:
+    - sim-pool
+  capabilities:
+    board: modalix
+    os_type: elxr
+    firmware: 2.1.0
+
+tasks:
+  - id: manual-shard-a
+    type: command
+    command:
+      argv:
+        - python
+        - -c
+        - "import os, time; time.sleep(5); print('manual-shard-a on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    timeout_sec: 60
+
+  - id: manual-shard-b
+    type: command
+    command:
+      argv:
+        - python
+        - -c
+        - "import os, time; time.sleep(5); print('manual-shard-b on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    timeout_sec: 60
+
+  - id: manual-shard-c
+    type: command
+    command:
+      argv:
+        - python
+        - -c
+        - "import os, time; time.sleep(5); print('manual-shard-c on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    timeout_sec: 60
+
+  - id: manual-shard-d
+    type: command
+    command:
+      argv:
+        - python
+        - -c
+        - "import os, time; time.sleep(5); print('manual-shard-d on ' + os.environ['KERRIGAN_TARGET_ID'])"
+    timeout_sec: 60

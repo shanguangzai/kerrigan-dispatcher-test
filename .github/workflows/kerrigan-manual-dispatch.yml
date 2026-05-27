@@ -1,0 +1,18 @@
+name: Kerrigan Manual Dispatch Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  kerrigan:
+    runs-on:
+      - self-hosted
+      - kerrigan
+    timeout-minutes: 15
+    env:
+      KERRIGAN_MANIFEST: .kerrigan/job.yaml
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Submit Kerrigan session
+        run: kerrigan-runner-bridge --timeout-sec 180
