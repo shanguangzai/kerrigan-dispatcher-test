@@ -36,7 +36,7 @@ on:
       artifact_sha256:
         description: CTest runtime artifact sha256
         type: string
-        default: "9294d633bbef54327410acd431ef4220a4f05dfc2a482c19665a98fc5cd199db"
+        default: "8cb4cf03f3c7bd7052ed12067c36a9c98a7ed6587ecba5f1db2952bf4aeccdca"
       strategy:
         description: Scheduling strategy
         type: choice
@@ -129,6 +129,17 @@ jobs:
                   "  bundle:",
                   "    include:",
                   "      - tests/**/*.py",
+                  "",
+              ])
+          if suite_type == "ctest":
+              lines.extend([
+                  "setup:",
+                  "  per_devkit:",
+                  "    - id: prepare-runtime",
+                  "      commands:",
+                  "        - echo \"preparing ${KERRIGAN_TARGET_ID}\"",
+                  "        - echo \"ready ${KERRIGAN_TARGET_ID}\" > \"/tmp/kerrigan-prepared-${KERRIGAN_TARGET_ID}\"",
+                  "      timeout_sec: 30",
                   "",
               ])
           lines.extend([
