@@ -362,6 +362,32 @@ setup:
       timeout_sec: 2400
       output_idle_timeout_sec: 120
 
+teardown:
+  per_devkit:
+    - id: cleanup-core-ci-temp-artifacts
+      shell: |
+        set -eu
+        TMP_ROOT=/tmp
+        MPK_BASE="${TMP_ROOT}/sima-mpk-kerrigan-core-ci"
+        echo "Disk usage before cleanup:"
+        df -h "${TMP_ROOT}" || true
+        du -sh "${TMP_ROOT}"/sima* "${TMP_ROOT}"/resnet*_mpk* 2>/dev/null || true
+        echo "Cleaning ${MPK_BASE}* and per-test temporary roots"
+        rm -rf "${MPK_BASE}"* \
+          "${TMP_ROOT}/sima_neat_mpk_tests" \
+          "${TMP_ROOT}/sima_neat_mpk_fixtures" \
+          "${TMP_ROOT}/sima_neat_fuzz_pipeline_sequence" \
+          "${TMP_ROOT}/sima_unit_asset_utils_readable_model_tar_test" \
+          "${TMP_ROOT}/sima_imagenet_goldfish.jpg" \
+          "${TMP_ROOT}/coco_sample.jpg" \
+          "${TMP_ROOT}/resnet_50_mpk.tar.gz" \
+          "${TMP_ROOT}/resnet-50_mpk.tar.gz" || true
+        find "${TMP_ROOT}" -maxdepth 1 -name 'sima_gst_registry_*.bin' -delete 2>/dev/null || true
+        find "${TMP_ROOT}" -maxdepth 1 -name 'sima-mpk-*' -type d -mmin +60 -exec rm -rf {} + 2>/dev/null || true
+        echo "Disk usage after cleanup:"
+        df -h "${TMP_ROOT}" || true
+      timeout_sec: 120
+
 scheduling:
   strategy: spread
   min_devkits: 2
@@ -615,31 +641,3 @@ tasks:
         "${PYTHON_BIN}" -m pytest -q "${PYTEST_DIR}"
     dependencies: *tutorial_task_ids
     timeout_sec: 300
-
-  - id: cleanup-core-ci-temp-artifacts
-    type: command
-    command:
-      shell: |
-        set -eu
-        TMP_ROOT=/tmp
-        MPK_BASE="${TMP_ROOT}/sima-mpk-kerrigan-core-ci"
-        echo "Disk usage before cleanup:"
-        df -h "${TMP_ROOT}" || true
-        du -sh "${TMP_ROOT}"/sima* "${TMP_ROOT}"/resnet*_mpk* 2>/dev/null || true
-        echo "Cleaning ${MPK_BASE}* and per-test temporary roots"
-        rm -rf "${MPK_BASE}"* \
-          "${TMP_ROOT}/sima_neat_mpk_tests" \
-          "${TMP_ROOT}/sima_neat_mpk_fixtures" \
-          "${TMP_ROOT}/sima_neat_fuzz_pipeline_sequence" \
-          "${TMP_ROOT}/sima_unit_asset_utils_readable_model_tar_test" \
-          "${TMP_ROOT}/sima_imagenet_goldfish.jpg" \
-          "${TMP_ROOT}/coco_sample.jpg" \
-          "${TMP_ROOT}/resnet_50_mpk.tar.gz" \
-          "${TMP_ROOT}/resnet-50_mpk.tar.gz" || true
-        find "${TMP_ROOT}" -maxdepth 1 -name 'sima_gst_registry_*.bin' -delete 2>/dev/null || true
-        find "${TMP_ROOT}" -maxdepth 1 -name 'sima-mpk-*' -type d -mmin +60 -exec rm -rf {} + 2>/dev/null || true
-        echo "Disk usage after cleanup:"
-        df -h "${TMP_ROOT}" || true
-    dependencies:
-      - core-python-pytest
-    timeout_sec: 120
