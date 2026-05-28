@@ -1,0 +1,47 @@
+metadata:
+  name: two-devkit-core-full-all
+  labels:
+    suite: manual
+    mode: real-devkit-vulcan-full
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+  vulcan_artifacts:
+    - env: stg
+      name: core
+      branch: develop
+      tag: latest
+      type: all
+      install_dir: /media/nvme/kerrigan-core-full-all
+      timeout_sec: 1800
+
+scheduling:
+  strategy: spread
+  min_devkits: 2
+  max_devkits: 2
+  max_parallel: 2
+  fail_fast: true
+  pools:
+    - default
+  capabilities:
+    board: modalix
+    os_type: elxr
+
+tasks:
+  - id: core-full-install-check-a
+    type: command
+    command:
+      shell: |
+        echo "core full(all) package installed on ${KERRIGAN_TARGET_ID}"
+        test -d /media/nvme/kerrigan-core-full-all
+        find /media/nvme/kerrigan-core-full-all -maxdepth 2 -type f | head -50
+    timeout_sec: 120
+
+  - id: core-full-install-check-b
+    type: command
+    command:
+      shell: |
+        echo "core full(all) package installed on ${KERRIGAN_TARGET_ID}"
+        test -d /media/nvme/kerrigan-core-full-all
+        find /media/nvme/kerrigan-core-full-all -maxdepth 2 -type f | head -50
+    timeout_sec: 120

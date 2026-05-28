@@ -8,6 +8,7 @@ on:
         type: choice
         options:
           - .kerrigan/single-devkit-core-install.yaml
+          - .kerrigan/two-devkit-core-full-all.yaml
           - .kerrigan/vulcan-core-develop-job.yaml
           - .kerrigan/ctest-job.yaml
           - .kerrigan/job.yaml
