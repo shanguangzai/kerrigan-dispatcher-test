@@ -35,4 +35,8 @@ tasks:
       shell: |
         echo "core framework install completed on ${KERRIGAN_TARGET_ID}"
         test -d /tmp/kerrigan-core-framework
-    timeout_sec: 30
+        for i in $(seq 1 30); do
+          echo "post-install heartbeat ${i}/30 $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          sleep 1
+        done
+    timeout_sec: 90
