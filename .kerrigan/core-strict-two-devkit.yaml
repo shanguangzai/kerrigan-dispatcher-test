@@ -125,6 +125,7 @@ tasks:
   - id: core-strict-ctest
     type: ctest
     test_dir: /media/nvme/kerrigan-core-ci-develop-bb5dab219ee5/sima-neat-2.0.0+develop.bb5dab2-Linux-extras/lib/sima-neat/tests
+    cwd: /media/nvme/kerrigan-core-ci-develop-bb5dab219ee5/sima-neat-2.0.0+develop.bb5dab2-Linux-extras
     selectors:
       - hybrid_graph_rtsp_resnet50_tput_test
       - unit_caps_bridge_test
@@ -313,6 +314,18 @@ tasks:
     args:
       - --no-tests=error
     env:
+      HOME: /home/sima
+      USER: sima
+      LOGNAME: sima
+      SHELL: /bin/bash
+      PATH: /data/sima-cli/.venv/bin:/home/sima/.sima-cli/.venv/bin:/home/sima/pyneat/bin:/usr/local/bin:/usr/bin:/bin:/usr/games
+      SIMA_CLI_CHECK_FOR_UPDATE: "0"
+      RUNNER_TEMP: /tmp/kerrigan-runner-temp
+      TMPDIR: /tmp
+      GITHUB_RUN_ID: kerrigan
+      GITHUB_RUN_ATTEMPT: "1"
+      GITHUB_JOB: core-strict-ctest
+      GST_REGISTRY: /tmp/kerrigan-gst-registry.bin
       SIMA_YOLOV8_VARIANTS_BASE_URL: https://docs.sima.ai/pkg_downloads/SDK2.0.0/models/modalix
       SIMA_MPK_EXTRACT_ROOT: /tmp/sima-mpk-kerrigan-core-ci
     timeout_sec: 300
