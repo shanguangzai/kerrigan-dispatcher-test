@@ -74,8 +74,18 @@ setup:
         TEST_ASSETS_ROOT="${EXTRAS_PREFIX}/share/sima-neat/test-assets"
         INSTALLED_DECODER_FIXTURE="${EXTRAS_LIB_DIR}/test-assets/decoder/dynamic_caps.h264"
         COMPAT_DECODER_FIXTURE="${TEST_DIR}/assets/decoder/dynamic_caps.h264"
+        COMPAT_ROOT_IMAGE="${EXTRAS_LIB_DIR}/test.jpg"
         if [ ! -d "${TEST_DIR}" ]; then
           echo "Required installed test path missing: ${TEST_DIR}" >&2
+          exit 1
+        fi
+        mkdir -p "${EXTRAS_LIB_DIR}/build"
+        touch "${EXTRAS_LIB_DIR}/CMakeLists.txt"
+        if [ -f "${TEST_ASSETS_ROOT}/test.jpg" ]; then
+          cp "${TEST_ASSETS_ROOT}/test.jpg" "${COMPAT_ROOT_IMAGE}"
+          echo "prepared source-root test image compatibility path: ${COMPAT_ROOT_IMAGE}"
+        else
+          echo "Required test image missing: ${TEST_ASSETS_ROOT}/test.jpg" >&2
           exit 1
         fi
         if [ -f "${INSTALLED_DECODER_FIXTURE}" ]; then
@@ -94,6 +104,9 @@ setup:
         while IFS= read -r f; do
           sed -E -i \
             -e "s|/[^\"[:space:]]*/build/tests/|${TEST_DIR}/|g" \
+            -e "s|\"/workspace\"|\"${EXTRAS_LIB_DIR}\"|g" \
+            -e "s|/workspace/build|${EXTRAS_LIB_DIR}/build|g" \
+            -e "s|/workspace/tests|${EXTRAS_LIB_DIR}/tests|g" \
             -e "s|/workspace/core|${EXTRAS_LIB_DIR}|g" \
             -e "s|/[^\"[:space:]]*/test\\.jpg|${TEST_ASSETS_ROOT}/test.jpg|g" \
             -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/gst-plugins|/usr/lib/aarch64-linux-gnu/neat/gst-plugins|g" \
