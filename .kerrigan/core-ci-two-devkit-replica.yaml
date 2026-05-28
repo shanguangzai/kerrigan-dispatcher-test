@@ -222,6 +222,7 @@ setup:
         VULCAN_ENV=stg
         export HOME=/home/sima
         export SIMA_CLI_CHECK_FOR_UPDATE=0
+        export CI=true
         export PATH=/data/sima-cli/.venv/bin:/home/sima/.sima-cli/.venv/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}
         run_privileged() {
           if [ "$(id -u)" = "0" ]; then
@@ -316,6 +317,12 @@ setup:
         PYTEST_DIR=${PYTEST_DIR}
         EOF
         ctest --test-dir "${TEST_DIR}" -N --label-regex strict --label-exclude long -E '^(unit_dispatcher_watchdog_test)$'
+        echo "Checking sima-cli login state"
+        if ! timeout 30 sima-cli login >/tmp/kerrigan-sima-cli-login-check.log 2>&1; then
+          cat /tmp/kerrigan-sima-cli-login-check.log >&2 || true
+          echo "sima-cli login check failed or required browser authentication; run sima-cli login on this devkit before Kerrigan setup." >&2
+          exit 1
+        fi
         if [ -x "${TUTORIALS_SHARE_ROOT}/build.sh" ]; then
           "${TUTORIALS_SHARE_ROOT}/build.sh" --download-models-only
         else
@@ -333,6 +340,7 @@ setup:
         recovery_step "restart rctd.service" systemctl restart rctd.service
         echo "prepared core CI test runtime from ${EXTRAS}"
       timeout_sec: 2400
+      output_idle_timeout_sec: 120
 
 scheduling:
   strategy: spread
