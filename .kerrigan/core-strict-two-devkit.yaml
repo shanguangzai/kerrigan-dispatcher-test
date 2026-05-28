@@ -82,7 +82,9 @@ setup:
         mkdir -p "${EXTRAS_LIB_DIR}/build"
         touch "${EXTRAS_LIB_DIR}/CMakeLists.txt"
         if [ -f "${TEST_ASSETS_ROOT}/test.jpg" ]; then
-          cp "${TEST_ASSETS_ROOT}/test.jpg" "${COMPAT_ROOT_IMAGE}"
+          if ! cmp -s "${TEST_ASSETS_ROOT}/test.jpg" "${COMPAT_ROOT_IMAGE}" 2>/dev/null; then
+            cp "${TEST_ASSETS_ROOT}/test.jpg" "${COMPAT_ROOT_IMAGE}"
+          fi
           echo "prepared source-root test image compatibility path: ${COMPAT_ROOT_IMAGE}"
         else
           echo "Required test image missing: ${TEST_ASSETS_ROOT}/test.jpg" >&2
@@ -90,7 +92,9 @@ setup:
         fi
         if [ -f "${INSTALLED_DECODER_FIXTURE}" ]; then
           mkdir -p "$(dirname "${COMPAT_DECODER_FIXTURE}")"
-          cp "${INSTALLED_DECODER_FIXTURE}" "${COMPAT_DECODER_FIXTURE}"
+          if ! cmp -s "${INSTALLED_DECODER_FIXTURE}" "${COMPAT_DECODER_FIXTURE}" 2>/dev/null; then
+            cp "${INSTALLED_DECODER_FIXTURE}" "${COMPAT_DECODER_FIXTURE}"
+          fi
           echo "prepared decoder dynamic fixture compatibility path: ${COMPAT_DECODER_FIXTURE}"
         else
           echo "Required decoder dynamic fixture missing: ${INSTALLED_DECODER_FIXTURE}" >&2
