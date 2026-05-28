@@ -72,8 +72,18 @@ setup:
         EXTRAS_PREFIX="${EXTRAS}"
         TEST_DIR="${EXTRAS_LIB_DIR}/tests"
         TEST_ASSETS_ROOT="${EXTRAS_PREFIX}/share/sima-neat/test-assets"
+        INSTALLED_DECODER_FIXTURE="${EXTRAS_LIB_DIR}/test-assets/decoder/dynamic_caps.h264"
+        COMPAT_DECODER_FIXTURE="${TEST_DIR}/assets/decoder/dynamic_caps.h264"
         if [ ! -d "${TEST_DIR}" ]; then
           echo "Required installed test path missing: ${TEST_DIR}" >&2
+          exit 1
+        fi
+        if [ -f "${INSTALLED_DECODER_FIXTURE}" ]; then
+          mkdir -p "$(dirname "${COMPAT_DECODER_FIXTURE}")"
+          cp "${INSTALLED_DECODER_FIXTURE}" "${COMPAT_DECODER_FIXTURE}"
+          echo "prepared decoder dynamic fixture compatibility path: ${COMPAT_DECODER_FIXTURE}"
+        else
+          echo "Required decoder dynamic fixture missing: ${INSTALLED_DECODER_FIXTURE}" >&2
           exit 1
         fi
         find "${EXTRAS_LIB_DIR}" -type f -name CTestTestfile.cmake | sort > /tmp/kerrigan-core-ci-ctest-files.txt
@@ -84,6 +94,7 @@ setup:
         while IFS= read -r f; do
           sed -E -i \
             -e "s|/[^\"[:space:]]*/build/tests/|${TEST_DIR}/|g" \
+            -e "s|/workspace/core|${EXTRAS_LIB_DIR}|g" \
             -e "s|/[^\"[:space:]]*/test\\.jpg|${TEST_ASSETS_ROOT}/test.jpg|g" \
             -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/gst-plugins|/usr/lib/aarch64-linux-gnu/neat/gst-plugins|g" \
             -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/runtime|/usr/lib/aarch64-linux-gnu/neat/runtime|g" \
