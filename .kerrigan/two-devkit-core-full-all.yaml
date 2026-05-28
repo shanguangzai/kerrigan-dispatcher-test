@@ -1,8 +1,8 @@
 metadata:
-  name: two-devkit-core-full-all
+  name: two-devkit-core-full-all-ctest
   labels:
     suite: manual
-    mode: real-devkit-vulcan-full
+    mode: real-devkit-vulcan-full-ctest
 
 source:
   repository: shanguangzai/kerrigan-dispatcher-test
@@ -14,6 +14,22 @@ source:
       type: all
       install_dir: /media/nvme/kerrigan-core-full-all
       timeout_sec: 1800
+
+setup:
+  per_devkit:
+    - id: prepare-core-ctest-workspace
+      shell: |
+        set -eu
+        INSTALL_DIR=/media/nvme/kerrigan-core-full-all
+        EXTRAS="$(find "${INSTALL_DIR}" -maxdepth 1 -type d -name 'sima-neat-*-Linux-extras' | sort | tail -1)"
+        WORK=/tmp/kerrigan-core-ctest
+        rm -rf "${WORK}"
+        mkdir -p "${WORK}"
+        cp "${EXTRAS}/lib/sima-neat/tests/CTestTestfile.cmake" "${WORK}/CTestTestfile.cmake"
+        python3 -c 'import sys; from pathlib import Path; extras=Path(sys.argv[1]); p=Path(sys.argv[2]); s=p.read_text(encoding="utf-8"); replacements=[("/workspace/build/tests", str(extras / "lib/sima-neat/tests")), ("/workspace/tests", str(extras / "share/sima-neat/tests")), ("/workspace/test.jpg", str(extras / "share/sima-neat/test-assets/test.jpg")), ("/workspace", str(extras)), ("/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/gst-plugins", "/usr/lib/aarch64-linux-gnu/neat/gst-plugins"), ("/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/runtime", "/usr/lib/aarch64-linux-gnu/neat/runtime"), ("/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu", "/usr/lib/aarch64-linux-gnu"), ("/opt/toolchain/aarch64/modalix/usr/lib", "/usr/lib")]; [globals().__setitem__("s", s.replace(old, new)) for old, new in replacements]; p.write_text(s, encoding="utf-8")' "${EXTRAS}" "${WORK}/CTestTestfile.cmake"
+        echo "prepared core CTest workspace ${WORK} from ${EXTRAS}"
+        ctest --test-dir "${WORK}" -N -R '^(unit_caps_bridge_test|unit_contracts_test|unit_detection_types_bbox_test|unit_neattensor_core_test|unit_outputspec_test|unit_run_api_matrix_test|unit_samplespec_test)$'
+      timeout_sec: 120
 
 scheduling:
   strategy: spread
@@ -28,20 +44,17 @@ scheduling:
     os_type: elxr
 
 tasks:
-  - id: core-full-install-check-a
-    type: command
-    command:
-      shell: |
-        echo "core full(all) package installed on ${KERRIGAN_TARGET_ID}"
-        test -d /media/nvme/kerrigan-core-full-all
-        find /media/nvme/kerrigan-core-full-all -maxdepth 2 -type f | head -50
-    timeout_sec: 120
-
-  - id: core-full-install-check-b
-    type: command
-    command:
-      shell: |
-        echo "core full(all) package installed on ${KERRIGAN_TARGET_ID}"
-        test -d /media/nvme/kerrigan-core-full-all
-        find /media/nvme/kerrigan-core-full-all -maxdepth 2 -type f | head -50
+  - id: core-runtime-ctest
+    type: ctest
+    test_dir: /tmp/kerrigan-core-ctest
+    selectors:
+      - unit_caps_bridge_test
+      - unit_contracts_test
+      - unit_detection_types_bbox_test
+      - unit_neattensor_core_test
+      - unit_outputspec_test
+      - unit_run_api_matrix_test
+      - unit_samplespec_test
+    env:
+      PATH: /data/sima-cli/.venv/bin:/home/sima/.sima-cli/.venv/bin:/usr/local/bin:/usr/bin:/bin
     timeout_sec: 120
