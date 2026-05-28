@@ -1,0 +1,38 @@
+metadata:
+  name: single-devkit-core-install
+  labels:
+    suite: manual
+    mode: real-devkit-smoke
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+  vulcan_artifacts:
+    - env: stg
+      name: core
+      branch: develop
+      tag: latest
+      type: minimal
+      install_dir: /tmp/kerrigan-core-framework
+      skip_devkit_sync: true
+      timeout_sec: 600
+
+scheduling:
+  strategy: serial
+  min_devkits: 1
+  max_devkits: 1
+  max_parallel: 1
+  fail_fast: true
+  pools:
+    - default
+  capabilities:
+    board: modalix
+    os_type: elxr
+
+tasks:
+  - id: core-framework-install-smoke
+    type: command
+    command:
+      shell: |
+        echo "core framework install completed on ${KERRIGAN_TARGET_ID}"
+        test -d /tmp/kerrigan-core-framework
+    timeout_sec: 30
