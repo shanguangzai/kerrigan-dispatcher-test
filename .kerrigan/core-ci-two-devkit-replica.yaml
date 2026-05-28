@@ -220,6 +220,7 @@ setup:
         INSTALL_ROOT=/media/nvme/kerrigan-core-ci-develop-bb5dab219ee5
         PACKAGE_SPEC=core@develop:bb5dab219ee5
         VULCAN_ENV=stg
+        export HOME=/home/sima
         export SIMA_CLI_CHECK_FOR_UPDATE=0
         export PATH=/data/sima-cli/.venv/bin:/home/sima/.sima-cli/.venv/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}
         run_privileged() {
@@ -571,6 +572,7 @@ tasks:
       shell: |
         set -eu
         . /tmp/kerrigan-core-ci-env
+        export HOME=/home/sima
         PYNEAT_HOME="${HOME}/pyneat"
         if [ -x "${PYNEAT_HOME}/bin/python" ]; then
           PYTHON_BIN="${PYNEAT_HOME}/bin/python"
