@@ -7,12 +7,13 @@ on:
         description: Static Kerrigan manifest to submit
         type: choice
         options:
+          - .kerrigan/core-ci-two-devkit-replica.yaml
           - .kerrigan/single-devkit-core-install.yaml
           - .kerrigan/two-devkit-core-full-all.yaml
           - .kerrigan/vulcan-core-develop-job.yaml
           - .kerrigan/ctest-job.yaml
           - .kerrigan/job.yaml
-        default: .kerrigan/single-devkit-core-install.yaml
+        default: .kerrigan/core-ci-two-devkit-replica.yaml
       bridge_timeout_sec:
         description: Runner bridge timeout
         type: number
@@ -23,7 +24,7 @@ jobs:
     runs-on:
       - self-hosted
       - kerrigan
-    timeout-minutes: 15
+    timeout-minutes: 60
     env:
       KERRIGAN_MANIFEST: ${{ inputs.manifest }}
     steps:

@@ -1,0 +1,615 @@
+x-strict-task-ids: &strict_task_ids
+  - core-strict-ctest-hybrid-graph-rtsp-resnet50-tput-test
+  - core-strict-ctest-unit-caps-bridge-test
+  - core-strict-ctest-unit-contract-compiler-boxdecode-test
+  - core-strict-ctest-unit-contract-compiler-mla-test
+  - core-strict-ctest-unit-contract-compiler-processcvu-test
+  - core-strict-ctest-unit-contract-architecture-guard-test
+  - core-strict-ctest-unit-contract-input-only-rules-test
+  - core-strict-ctest-unit-contract-render-manifest-equivalence-test
+  - core-strict-ctest-unit-contracts-test
+  - core-strict-ctest-unit-boxdecode-render-manifest-from-model-test
+  - core-strict-ctest-unit-model-route-retarget-helper-test
+  - core-strict-ctest-unit-dequant-processcvu-contract-equivalence-test
+  - core-strict-ctest-unit-dequant-node-fragment-test
+  - core-strict-ctest-unit-detection-types-bbox-test
+  - core-strict-ctest-unit-detessdequant-output-info-test
+  - core-strict-ctest-unit-route-capability-mpk-static-contract-test
+  - core-strict-ctest-unit-route-plan-detess-adapter-test
+  - core-strict-ctest-unit-dispatcher-recovery-test
+  - core-strict-ctest-unit-error-code-taxonomy-test
+  - core-strict-ctest-unit-encoded-sample-test
+  - core-strict-ctest-unit-env-util-profile-test
+  - core-strict-ctest-unit-framestream-test
+  - core-strict-ctest-unit-graph-compiler-determinism-test
+  - core-strict-ctest-unit-graph-compiler-spec-validation-test
+  - core-strict-ctest-unit-graph-compiler-topology-test
+  - core-strict-ctest-unit-graph-join-bundle-test
+  - core-strict-ctest-unit-graph-join-encoded-with-meta-test
+  - core-strict-ctest-unit-graph-join-nodes-test
+  - core-strict-ctest-unit-graph-stamp-frame-id-test
+  - core-strict-ctest-unit-graph-backpressure-timeout-test
+  - core-strict-ctest-unit-graph-run-option-validation-test
+  - core-strict-ctest-unit-graph-stage-emitter-test
+  - core-strict-ctest-unit-graph-stop-sequencing-test
+  - core-strict-ctest-unit-graph-strict-sync-store-test
+  - core-strict-ctest-unit-graph-strict-sync-test
+  - core-strict-ctest-unit-genai-prompt-builder-test
+  - core-strict-ctest-unit-genai-image-types-test
+  - core-strict-ctest-unit-genai-audio-types-test
+  - core-strict-ctest-unit-genai-header-compile-surface-test
+  - core-strict-ctest-unit-genai-text-tensor-test
+  - core-strict-ctest-unit-header-neat-compile-surface-test
+  - core-strict-ctest-unit-verbose-options-surface-test
+  - core-strict-ctest-unit-gst-data-adapter-edge-test
+  - core-strict-ctest-unit-groups-test
+  - core-strict-ctest-unit-gst-helpers-test
+  - core-strict-ctest-unit-gst-init-guard-test
+  - core-strict-ctest-unit-gst-video-meta-test
+  - core-strict-ctest-unit-inputstream-dynamic-policy-matrix-test
+  - core-strict-ctest-unit-input-policy-test
+  - core-strict-ctest-unit-input-planner-semantics-test
+  - core-strict-ctest-unit-preprocess-meta-validation-test
+  - core-strict-ctest-unit-preprocess-meta-template-dynamic-test
+  - core-strict-ctest-unit-preproc-contract-rules-test
+  - core-strict-ctest-unit-inputstream-stop-timeout-detach-test
+  - core-strict-ctest-unit-inputappsrc-stop-race-test
+  - core-strict-ctest-unit-neatdecoder-keepalive-test
+  - core-strict-ctest-unit-neatencoder-keepalive-test
+  - core-strict-ctest-unit-neatmodel-async-api-test
+  - core-strict-ctest-unit-neattensor-core-test
+  - core-strict-ctest-unit-neattensor-cvmat-test
+  - core-strict-ctest-unit-tensorbuffer-packed-runtime-parent-test
+  - core-strict-ctest-unit-tensorbuffer-padded-hwc-gap-inference-test
+  - core-strict-ctest-unit-tensorbuffer-runtime-contract-identity-overlay-test
+  - core-strict-ctest-unit-tensorbuffer-strided-parent-view-materialize-test
+  - core-strict-ctest-unit-modelpack-extract-test
+  - core-strict-ctest-unit-asset-utils-readable-model-tar-test
+  - core-strict-ctest-unit-model-infer-output-name-test
+  - core-strict-ctest-unit-model-input-spec-contract-test
+  - core-strict-ctest-unit-model-output-spec-contract-test
+  - core-strict-ctest-unit-post-region-materialization-test
+  - core-strict-ctest-unit-model-metadata-test
+  - core-strict-ctest-unit-model-route-planner-test
+  - core-strict-ctest-unit-resnet50-mla-handoff-segment-test
+  - core-strict-ctest-unit-cast-fanout-contract-test
+  - core-strict-ctest-unit-mla-boundary-output-contract-test
+  - core-strict-ctest-unit-route-graph-slice-kernel-test
+  - core-strict-ctest-unit-modelpack-mla-handoff-segment-test
+  - core-strict-ctest-unit-model-stage-fragments-test
+  - core-strict-ctest-unit-modalix-contract-preflight-test
+  - core-strict-ctest-unit-mpk-graph-dump-test
+  - core-strict-ctest-unit-mpk-fuse-sibling-pre-mla-test
+  - core-strict-ctest-unit-mpk-contract-legacy-ingress-test
+  - core-strict-ctest-unit-mla-elf-io-topology-test
+  - core-strict-ctest-unit-mpk-loader-test
+  - core-strict-ctest-unit-mpk-pipeline-adapter-test
+  - core-strict-ctest-unit-outputspec-test
+  - core-strict-ctest-unit-pcie-nodes-test
+  - core-strict-ctest-pull-timeout-regression-test
+  - core-strict-ctest-property-config-json-test
+  - core-strict-ctest-property-pipeline-string-test
+  - core-strict-ctest-unit-pipeline-internal-build-test
+  - core-strict-ctest-unit-power-telemetry-test
+  - core-strict-ctest-unit-policy-defaults-test
+  - core-strict-ctest-unit-run-api-matrix-test
+  - core-strict-ctest-unit-run-lifecycle-teardown-test
+  - core-strict-ctest-unit-run-overflow-policy-parity-test
+  - core-strict-ctest-unit-runtime-metrics-test
+  - core-strict-ctest-unit-samplespec-test
+  - core-strict-ctest-unit-sample-bundle-holder-test
+  - core-strict-ctest-unit-session-api-surface-test
+  - core-strict-ctest-unit-session-build-input-strategy-test
+  - core-strict-ctest-unit-session-io-contract-test
+  - core-strict-ctest-unit-session-naming-transform-test
+  - core-strict-ctest-session-stage-contract-equivalence-test
+  - core-strict-ctest-unit-simaai-guard-test
+  - core-strict-ctest-unit-simaai-allocator-share-test
+  - core-strict-ctest-unit-static-spec-builders-dtype-token-test
+  - core-strict-ctest-unit-sima-boxdecode-static-contract-extractor-test
+  - core-strict-ctest-unit-boxdecode-uses-upstream-cast-contract-test
+  - core-strict-ctest-unit-sima-boxdecode-node-fragment-test
+  - core-strict-ctest-unit-kernel200-envelope-guard-test
+  - core-strict-ctest-unit-processcvu-binding-table-uses-runtime-outputs-test
+  - core-strict-ctest-unit-processcvu-preproc-runtime-vs-exposed-outputs-test
+  - core-strict-ctest-unit-stage-transform-rule-registry-test
+  - core-strict-ctest-unit-sima-plugin-static-manifest-parse-test
+  - core-strict-ctest-unit-sima-plugin-static-manifest-contract-test
+  - core-strict-ctest-unit-sima-plugin-context-injection-test
+  - core-strict-ctest-unit-sima-plugin-context-late-child-injection-test
+  - core-strict-ctest-unit-sima-plugin-context-copy-test
+  - core-strict-ctest-unit-sima-plugin-context-attach-lifetime-test
+  - core-strict-ctest-unit-sima-plugin-context-replacement-test
+  - core-strict-ctest-unit-sima-plugin-context-destroyed-pipeline-test
+  - core-strict-ctest-unit-sima-plugins-test
+  - core-strict-ctest-unit-pipeline-sequence-parse-test
+  - core-strict-ctest-unit-processmla-model-load-failure-test
+  - core-strict-ctest-unit-processmla-requires-explicit-output-contract-test
+  - core-strict-ctest-unit-tensor-set-meta-route-contract-test
+  - core-strict-ctest-unit-tensorbuffer-bind-preserve-source-view-test
+  - core-strict-ctest-unit-tensorbuffer-publish-view-segment-name-precedence-test
+  - core-strict-ctest-unit-sample-tensor-set-materialized-parent-offsets-test
+  - core-strict-ctest-unit-yolov8-mla-handoff-segment-test
+  - core-strict-ctest-unit-yolov8-contract-subset-test
+  - core-strict-ctest-unit-agg-model-managed-no-standalone-json-test
+  - core-strict-ctest-unit-tensor-list-api-test
+  - core-strict-ctest-unit-tensor-conversion-policy-test
+  - core-strict-ctest-unit-tensor-image-mapping-test
+  - core-strict-ctest-unit-transport-shared-parent-input-test
+  - core-strict-ctest-unit-transport-output-nodes-test
+  - core-strict-ctest-unit-node-metadata-sender-test
+  - core-strict-ctest-unit-nodes-test
+  - core-strict-ctest-unit-plugin-failure-messages-test
+  - core-strict-ctest-unit-video-sender-test
+  - core-strict-ctest-unit-tensor-from-cv-mat-exactness-test
+  - core-strict-ctest-unit-builder-test
+  - core-strict-ctest-unit-appsrcimage-test
+  - core-strict-ctest-unit-image-group-runtime-test
+  - core-strict-ctest-unit-pipeline-io-test
+  - core-strict-ctest-neat-tensor-device-placement-test
+  - core-strict-ctest-appsrc-videoconvert-fakesink-test
+  - core-strict-ctest-appsrc-videoscale-fakesink-test
+  - core-strict-ctest-async-stream-test
+  - core-strict-ctest-caps-negotiation-matrix-regression-test
+  - core-strict-ctest-decoder-download-test
+  - core-strict-ctest-decoder-drop-on-resolution-change-test
+  - core-strict-ctest-decoder-dynamic-caps-test
+  - core-strict-ctest-decoder-quality-compare-test
+  - core-strict-ctest-decoder-visible-caps-test
+  - core-strict-ctest-hybrid-graph-basic-test
+  - core-strict-ctest-hybrid-graph-bundle-test
+  - core-strict-ctest-graph-deterministic-routing-regression-test
+  - core-strict-ctest-hybrid-graph-fanout-test
+  - core-strict-ctest-hybrid-graph-multistream-scheduler-test
+  - core-strict-ctest-hybrid-graph-stage-model-test
+  - core-strict-ctest-output-appsink-policy-test
+  - core-strict-ctest-gst-data-adapter-runtime-regression-test
+  - core-strict-ctest-preproc-standalone-test
+  - core-strict-ctest-session-naming-pipeline-integration-test
+  - core-strict-ctest-session-rtsp-lifecycle-regression-test
+  - core-strict-ctest-session-validate-report-regression-test
+  - core-strict-ctest-stage-routing-regression-test
+  - core-strict-ctest-metadata-sender-udp-integration-test
+  - core-strict-ctest-udp-output-loopback-integration-test
+  - core-strict-ctest-preproc-dynamic-renegotiate-test
+  - core-strict-ctest-security-modelpack-matrix-test
+  - core-strict-ctest-file-read-test
+  - core-strict-ctest-async-yolov8-tput-test
+  - core-strict-ctest-sync-yolov8-test
+  - core-strict-ctest-sync-yolov8-test-detessdequant
+  - core-strict-ctest-yolov8-variant-route-matrix-test
+  - core-strict-ctest-preproc-yolov8-matrix-test
+  - core-strict-ctest-graphpipes-yolo-metadata-sender-16stream-test
+  - core-strict-ctest-model-resnet50-multi-test
+  - core-strict-ctest-model-unique-names-test
+  - core-strict-ctest-rtsp-pull-frame-test
+x-tutorial-task-ids: &tutorial_task_ids
+  - core-tutorial-ctest-tutorial-001-run-your-first-model
+  - core-tutorial-ctest-tutorial-002-run-inference-async
+  - core-tutorial-ctest-tutorial-003-build-inference-pipeline
+  - core-tutorial-ctest-tutorial-004-configure-model-options
+  - core-tutorial-ctest-tutorial-005-preprocess-images
+  - core-tutorial-ctest-tutorial-006-read-detection-boxes
+  - core-tutorial-ctest-tutorial-007-plug-model-into-pipeline
+  - core-tutorial-ctest-tutorial-008-pass-numpy-to-model
+  - core-tutorial-ctest-tutorial-009-feed-multi-input-model
+  - core-tutorial-ctest-tutorial-010-interpret-model-output
+  - core-tutorial-ctest-tutorial-011-diagnose-a-pipeline
+  - core-tutorial-ctest-tutorial-012-build-a-custom-data-graph
+  - core-tutorial-ctest-tutorial-013-embed-model-inside-graph
+  - core-tutorial-ctest-tutorial-014-run-multiple-streams
+  - core-tutorial-ctest-tutorial-015-tune-throughput-and-queues
+  - core-tutorial-ctest-tutorial-016-build-production-pipeline
+  - core-tutorial-ctest-tutorial-017-consume-rtsp-stream
+
+metadata:
+  name: core-develop-bb5dab2-two-devkit-ci-replica
+  labels:
+    suite: core-ci-replica
+    source_run: "26544517284"
+    source_job: "78201436004"
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+
+setup:
+  per_devkit:
+    - id: prepare-core-ci-runtime
+      shell: |
+        set -eu
+        INSTALL_ROOT=/media/nvme/kerrigan-core-ci-develop-bb5dab219ee5
+        PACKAGE_SPEC=core@develop:bb5dab219ee5
+        VULCAN_ENV=stg
+        export SIMA_CLI_CHECK_FOR_UPDATE=0
+        export PATH=/data/sima-cli/.venv/bin:/home/sima/.sima-cli/.venv/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}
+        run_privileged() {
+          if [ "$(id -u)" = "0" ]; then
+            "$@"
+          else
+            printf '%s\n' "${DEVKIT_PASSWORD:-edgeai}" | sudo -S -p '' "$@"
+          fi
+        }
+        recovery_step() {
+          label="$1"
+          shift
+          echo "[recovery] ${label}..."
+          if run_privileged "$@"; then
+            echo "[recovery] ${label} rc=0"
+          else
+            rc=$?
+            echo "[recovery] ${label} rc=${rc}"
+          fi
+        }
+        if [ -d /data/simaai/coprocessing ]; then
+          recovery_step "empty coprocessing directory" find /data/simaai/coprocessing -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+        else
+          echo "[recovery] empty coprocessing skipped: directory not found /data/simaai/coprocessing"
+        fi
+        free_mb="$(df -Pm / | awk 'NR==2 {print $4}')"
+        if [ -n "${free_mb}" ] && [ "${free_mb}" -lt 500 ]; then
+          recovery_step "remove /tmp/sima_* for low root free space" sh -c 'rm -rf /tmp/sima_*'
+        else
+          echo "[recovery] /tmp cleanup skipped: root free space is ${free_mb:-unknown}MB (threshold 500MB)"
+        fi
+        recovery_step "remoteproc0 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "remoteproc1 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc1 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc0 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "remoteproc status" sh -c 'for rp in /sys/class/remoteproc/remoteproc0 /sys/class/remoteproc/remoteproc1; do echo "$rp: $(cat $rp/name) state=$(cat $rp/state)"; done'
+        recovery_step "init_mla_memory" /usr/bin/init_mla_memory.sh
+        recovery_step "restart simaai-appcomplex.service" systemctl restart simaai-appcomplex.service
+        recovery_step "restart simaai-pipeline-manager.service" systemctl restart simaai-pipeline-manager.service
+        recovery_step "restart rctd.service" systemctl restart rctd.service
+        if ! command -v sima-cli >/dev/null 2>&1; then
+          echo "sima-cli not found on devkit" >&2
+          exit 1
+        fi
+        echo "Installing ${PACKAGE_SPEC} from Vulcan env ${VULCAN_ENV} into ${INSTALL_ROOT}"
+        sima-cli neat install --env "${VULCAN_ENV}" --type all --install-dir "${INSTALL_ROOT}" "${PACKAGE_SPEC}"
+        EXTRAS="$(find "${INSTALL_ROOT}" -maxdepth 1 -type d -name 'sima-neat-*-Linux-extras' | sort | tail -1)"
+        if [ -z "${EXTRAS}" ]; then
+          echo "Unable to locate extras directory under ${INSTALL_ROOT}" >&2
+          exit 1
+        fi
+        EXTRAS_LIB_DIR="${EXTRAS}/lib/sima-neat"
+        EXTRAS_PREFIX="${EXTRAS}"
+        TEST_DIR="${EXTRAS_LIB_DIR}/tests"
+        TUTORIALS_DIR="${EXTRAS_LIB_DIR}/tutorials"
+        TUTORIALS_SHARE_ROOT="${EXTRAS_PREFIX}/share/sima-neat/tutorials"
+        TEST_ASSETS_ROOT="${EXTRAS_PREFIX}/share/sima-neat/test-assets"
+        PYTEST_DIR="${EXTRAS_PREFIX}/share/sima-neat/python/tests"
+        for path in "${TEST_DIR}" "${TUTORIALS_DIR}" "${PYTEST_DIR}"; do
+          if [ ! -d "${path}" ]; then
+            echo "Required installed test path missing: ${path}" >&2
+            exit 1
+          fi
+        done
+        find "${EXTRAS_LIB_DIR}" -type f -name CTestTestfile.cmake | sort > /tmp/kerrigan-core-ci-ctest-files.txt
+        if [ ! -s /tmp/kerrigan-core-ci-ctest-files.txt ]; then
+          echo "No CTestTestfile.cmake files found under ${EXTRAS_LIB_DIR}" >&2
+          exit 1
+        fi
+        while IFS= read -r f; do
+          sed -E -i \
+            -e "s|/[^\"[:space:]]*/build/tests/|${TEST_DIR}/|g" \
+            -e "s|/[^\"[:space:]]*/build/tutorials/|${TUTORIALS_DIR}/|g" \
+            -e "s|/[^\"[:space:]]*/tutorials/assets/|${TUTORIALS_SHARE_ROOT}/assets/|g" \
+            -e "s|/[^\"[:space:]]*/test\\.jpg|${TEST_ASSETS_ROOT}/test.jpg|g" \
+            -e "s|/[^\"[:space:]]*/tutorials/run_with_modelzoo\\.sh|${TUTORIALS_SHARE_ROOT}/run_with_modelzoo.sh|g" \
+            -e "s|/[^\"[:space:]]*/tutorials/build\\.sh|${TUTORIALS_SHARE_ROOT}/build.sh|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/gst-plugins|/usr/lib/aarch64-linux-gnu/neat/gst-plugins|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/runtime|/usr/lib/aarch64-linux-gnu/neat/runtime|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu|/usr/lib/aarch64-linux-gnu|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib|/usr/lib|g" \
+            "${f}"
+        done < /tmp/kerrigan-core-ci-ctest-files.txt
+        if grep -R -n -E '/build/tests/|/build/tutorials/' "${EXTRAS_LIB_DIR}" --include CTestTestfile.cmake; then
+          echo "CTEST path rebasing incomplete; stale absolute paths remain." >&2
+          exit 1
+        fi
+        cat > /tmp/kerrigan-core-ci-env <<EOF
+        EXTRAS_PREFIX=${EXTRAS_PREFIX}
+        EXTRAS_LIB_DIR=${EXTRAS_LIB_DIR}
+        TEST_DIR=${TEST_DIR}
+        TUTORIALS_DIR=${TUTORIALS_DIR}
+        PYTEST_DIR=${PYTEST_DIR}
+        EOF
+        ctest --test-dir "${TEST_DIR}" -N --label-regex strict --label-exclude long -E '^(unit_dispatcher_watchdog_test)$'
+        if [ -x "${TUTORIALS_SHARE_ROOT}/build.sh" ]; then
+          "${TUTORIALS_SHARE_ROOT}/build.sh" --download-models-only
+        else
+          echo "Installed tutorial build.sh not found or not executable: ${TUTORIALS_SHARE_ROOT}/build.sh" >&2
+          exit 1
+        fi
+        # The core workflow runs runtime recovery again after install/rebase.
+        recovery_step "remoteproc0 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "remoteproc1 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc1 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc0 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "init_mla_memory" /usr/bin/init_mla_memory.sh
+        recovery_step "restart simaai-appcomplex.service" systemctl restart simaai-appcomplex.service
+        recovery_step "restart simaai-pipeline-manager.service" systemctl restart simaai-pipeline-manager.service
+        recovery_step "restart rctd.service" systemctl restart rctd.service
+        echo "prepared core CI test runtime from ${EXTRAS}"
+      timeout_sec: 2400
+
+scheduling:
+  strategy: spread
+  min_devkits: 2
+  max_devkits: 2
+  max_parallel: 2
+  fail_fast: true
+  pools:
+    - default
+  capabilities:
+    board: modalix
+    os_type: elxr
+
+tasks:
+  - id: core-strict-ctest
+    type: ctest
+    test_dir: /media/nvme/kerrigan-core-ci-develop-bb5dab219ee5/sima-neat-2.0.0+develop.bb5dab2-Linux-extras/lib/sima-neat/tests
+    selectors:
+      - hybrid_graph_rtsp_resnet50_tput_test
+      - unit_caps_bridge_test
+      - unit_contract_compiler_boxdecode_test
+      - unit_contract_compiler_mla_test
+      - unit_contract_compiler_processcvu_test
+      - unit_contract_architecture_guard_test
+      - unit_contract_input_only_rules_test
+      - unit_contract_render_manifest_equivalence_test
+      - unit_contracts_test
+      - unit_boxdecode_render_manifest_from_model_test
+      - unit_model_route_retarget_helper_test
+      - unit_dequant_processcvu_contract_equivalence_test
+      - unit_dequant_node_fragment_test
+      - unit_detection_types_bbox_test
+      - unit_detessdequant_output_info_test
+      - unit_route_capability_mpk_static_contract_test
+      - unit_route_plan_detess_adapter_test
+      - unit_dispatcher_recovery_test
+      - unit_error_code_taxonomy_test
+      - unit_encoded_sample_test
+      - unit_env_util_profile_test
+      - unit_framestream_test
+      - unit_graph_compiler_determinism_test
+      - unit_graph_compiler_spec_validation_test
+      - unit_graph_compiler_topology_test
+      - unit_graph_join_bundle_test
+      - unit_graph_join_encoded_with_meta_test
+      - unit_graph_join_nodes_test
+      - unit_graph_stamp_frame_id_test
+      - unit_graph_backpressure_timeout_test
+      - unit_graph_run_option_validation_test
+      - unit_graph_stage_emitter_test
+      - unit_graph_stop_sequencing_test
+      - unit_graph_strict_sync_store_test
+      - unit_graph_strict_sync_test
+      - unit_genai_prompt_builder_test
+      - unit_genai_image_types_test
+      - unit_genai_audio_types_test
+      - unit_genai_header_compile_surface_test
+      - unit_genai_text_tensor_test
+      - unit_header_neat_compile_surface_test
+      - unit_verbose_options_surface_test
+      - unit_gst_data_adapter_edge_test
+      - unit_groups_test
+      - unit_gst_helpers_test
+      - unit_gst_init_guard_test
+      - unit_gst_video_meta_test
+      - unit_inputstream_dynamic_policy_matrix_test
+      - unit_input_policy_test
+      - unit_input_planner_semantics_test
+      - unit_preprocess_meta_validation_test
+      - unit_preprocess_meta_template_dynamic_test
+      - unit_preproc_contract_rules_test
+      - unit_inputstream_stop_timeout_detach_test
+      - unit_inputappsrc_stop_race_test
+      - unit_neatdecoder_keepalive_test
+      - unit_neatencoder_keepalive_test
+      - unit_neatmodel_async_api_test
+      - unit_neattensor_core_test
+      - unit_neattensor_cvmat_test
+      - unit_tensorbuffer_packed_runtime_parent_test
+      - unit_tensorbuffer_padded_hwc_gap_inference_test
+      - unit_tensorbuffer_runtime_contract_identity_overlay_test
+      - unit_tensorbuffer_strided_parent_view_materialize_test
+      - unit_modelpack_extract_test
+      - unit_asset_utils_readable_model_tar_test
+      - unit_model_infer_output_name_test
+      - unit_model_input_spec_contract_test
+      - unit_model_output_spec_contract_test
+      - unit_post_region_materialization_test
+      - unit_model_metadata_test
+      - unit_model_route_planner_test
+      - unit_resnet50_mla_handoff_segment_test
+      - unit_cast_fanout_contract_test
+      - unit_mla_boundary_output_contract_test
+      - unit_route_graph_slice_kernel_test
+      - unit_modelpack_mla_handoff_segment_test
+      - unit_model_stage_fragments_test
+      - unit_modalix_contract_preflight_test
+      - unit_mpk_graph_dump_test
+      - unit_mpk_fuse_sibling_pre_mla_test
+      - unit_mpk_contract_legacy_ingress_test
+      - unit_mla_elf_io_topology_test
+      - unit_mpk_loader_test
+      - unit_mpk_pipeline_adapter_test
+      - unit_outputspec_test
+      - unit_pcie_nodes_test
+      - pull_timeout_regression_test
+      - property_config_json_test
+      - property_pipeline_string_test
+      - unit_pipeline_internal_build_test
+      - unit_power_telemetry_test
+      - unit_policy_defaults_test
+      - unit_run_api_matrix_test
+      - unit_run_lifecycle_teardown_test
+      - unit_run_overflow_policy_parity_test
+      - unit_runtime_metrics_test
+      - unit_samplespec_test
+      - unit_sample_bundle_holder_test
+      - unit_session_api_surface_test
+      - unit_session_build_input_strategy_test
+      - unit_session_io_contract_test
+      - unit_session_naming_transform_test
+      - session_stage_contract_equivalence_test
+      - unit_simaai_guard_test
+      - unit_simaai_allocator_share_test
+      - unit_static_spec_builders_dtype_token_test
+      - unit_sima_boxdecode_static_contract_extractor_test
+      - unit_boxdecode_uses_upstream_cast_contract_test
+      - unit_sima_boxdecode_node_fragment_test
+      - unit_kernel200_envelope_guard_test
+      - unit_processcvu_binding_table_uses_runtime_outputs_test
+      - unit_processcvu_preproc_runtime_vs_exposed_outputs_test
+      - unit_stage_transform_rule_registry_test
+      - unit_sima_plugin_static_manifest_parse_test
+      - unit_sima_plugin_static_manifest_contract_test
+      - unit_sima_plugin_context_injection_test
+      - unit_sima_plugin_context_late_child_injection_test
+      - unit_sima_plugin_context_copy_test
+      - unit_sima_plugin_context_attach_lifetime_test
+      - unit_sima_plugin_context_replacement_test
+      - unit_sima_plugin_context_destroyed_pipeline_test
+      - unit_sima_plugins_test
+      - unit_pipeline_sequence_parse_test
+      - unit_processmla_model_load_failure_test
+      - unit_processmla_requires_explicit_output_contract_test
+      - unit_tensor_set_meta_route_contract_test
+      - unit_tensorbuffer_bind_preserve_source_view_test
+      - unit_tensorbuffer_publish_view_segment_name_precedence_test
+      - unit_sample_tensor_set_materialized_parent_offsets_test
+      - unit_yolov8_mla_handoff_segment_test
+      - unit_yolov8_contract_subset_test
+      - unit_agg_model_managed_no_standalone_json_test
+      - unit_tensor_list_api_test
+      - unit_tensor_conversion_policy_test
+      - unit_tensor_image_mapping_test
+      - unit_transport_shared_parent_input_test
+      - unit_transport_output_nodes_test
+      - unit_node_metadata_sender_test
+      - unit_nodes_test
+      - unit_plugin_failure_messages_test
+      - unit_video_sender_test
+      - unit_tensor_from_cv_mat_exactness_test
+      - unit_builder_test
+      - unit_appsrcimage_test
+      - unit_image_group_runtime_test
+      - unit_pipeline_io_test
+      - neat_tensor_device_placement_test
+      - appsrc_videoconvert_fakesink_test
+      - appsrc_videoscale_fakesink_test
+      - async_stream_test
+      - caps_negotiation_matrix_regression_test
+      - decoder_download_test
+      - decoder_drop_on_resolution_change_test
+      - decoder_dynamic_caps_test
+      - decoder_quality_compare_test
+      - decoder_visible_caps_test
+      - hybrid_graph_basic_test
+      - hybrid_graph_bundle_test
+      - graph_deterministic_routing_regression_test
+      - hybrid_graph_fanout_test
+      - hybrid_graph_multistream_scheduler_test
+      - hybrid_graph_stage_model_test
+      - output_appsink_policy_test
+      - gst_data_adapter_runtime_regression_test
+      - preproc_standalone_test
+      - session_naming_pipeline_integration_test
+      - session_rtsp_lifecycle_regression_test
+      - session_validate_report_regression_test
+      - stage_routing_regression_test
+      - metadata_sender_udp_integration_test
+      - udp_output_loopback_integration_test
+      - preproc_dynamic_renegotiate_test
+      - security_modelpack_matrix_test
+      - file_read_test
+      - async_yolov8_tput_test
+      - sync_yolov8_test
+      - sync_yolov8_test_detessdequant
+      - yolov8_variant_route_matrix_test
+      - preproc_yolov8_matrix_test
+      - graphpipes_yolo_metadata_sender_16stream_test
+      - model_resnet50_multi_test
+      - model_unique_names_test
+      - rtsp_pull_frame_test
+    args:
+      - --no-tests=error
+    env:
+      SIMA_YOLOV8_VARIANTS_BASE_URL: https://docs.sima.ai/pkg_downloads/SDK2.0.0/models/modalix
+      SIMA_MPK_EXTRACT_ROOT: /tmp/sima-mpk-kerrigan-core-ci
+    timeout_sec: 300
+
+  - id: core-tutorial-ctest
+    type: ctest
+    test_dir: /media/nvme/kerrigan-core-ci-develop-bb5dab219ee5/sima-neat-2.0.0+develop.bb5dab2-Linux-extras/lib/sima-neat/tutorials
+    selectors:
+      - tutorial_001_run_your_first_model
+      - tutorial_002_run_inference_async
+      - tutorial_003_build_inference_pipeline
+      - tutorial_004_configure_model_options
+      - tutorial_005_preprocess_images
+      - tutorial_006_read_detection_boxes
+      - tutorial_007_plug_model_into_pipeline
+      - tutorial_008_pass_numpy_to_model
+      - tutorial_009_feed_multi_input_model
+      - tutorial_010_interpret_model_output
+      - tutorial_011_diagnose_a_pipeline
+      - tutorial_012_build_a_custom_data_graph
+      - tutorial_013_embed_model_inside_graph
+      - tutorial_014_run_multiple_streams
+      - tutorial_015_tune_throughput_and_queues
+      - tutorial_016_build_production_pipeline
+      - tutorial_017_consume_rtsp_stream
+    dependencies: *strict_task_ids
+    timeout_sec: 300
+
+  - id: core-python-pytest
+    type: command
+    command:
+      shell: |
+        set -eu
+        . /tmp/kerrigan-core-ci-env
+        PYNEAT_HOME="${HOME}/pyneat"
+        if [ -x "${PYNEAT_HOME}/bin/python" ]; then
+          PYTHON_BIN="${PYNEAT_HOME}/bin/python"
+        elif [ -x "${PYNEAT_HOME}/.venv/bin/python" ]; then
+          PYTHON_BIN="${PYNEAT_HOME}/.venv/bin/python"
+        else
+          echo "Expected pyneat python not found at ${PYNEAT_HOME}/bin/python or ${PYNEAT_HOME}/.venv/bin/python" >&2
+          exit 1
+        fi
+        "${PYTHON_BIN}" -m pip install --upgrade pip
+        "${PYTHON_BIN}" -m pip install pytest
+        "${PYTHON_BIN}" -m pytest -q "${PYTEST_DIR}"
+    dependencies: *tutorial_task_ids
+    timeout_sec: 300
+
+  - id: cleanup-core-ci-temp-artifacts
+    type: command
+    command:
+      shell: |
+        set -eu
+        TMP_ROOT=/tmp
+        MPK_BASE="${TMP_ROOT}/sima-mpk-kerrigan-core-ci"
+        echo "Disk usage before cleanup:"
+        df -h "${TMP_ROOT}" || true
+        du -sh "${TMP_ROOT}"/sima* "${TMP_ROOT}"/resnet*_mpk* 2>/dev/null || true
+        echo "Cleaning ${MPK_BASE}* and per-test temporary roots"
+        rm -rf "${MPK_BASE}"* \
+          "${TMP_ROOT}/sima_neat_mpk_tests" \
+          "${TMP_ROOT}/sima_neat_mpk_fixtures" \
+          "${TMP_ROOT}/sima_neat_fuzz_pipeline_sequence" \
+          "${TMP_ROOT}/sima_unit_asset_utils_readable_model_tar_test" \
+          "${TMP_ROOT}/sima_imagenet_goldfish.jpg" \
+          "${TMP_ROOT}/coco_sample.jpg" \
+          "${TMP_ROOT}/resnet_50_mpk.tar.gz" \
+          "${TMP_ROOT}/resnet-50_mpk.tar.gz" || true
+        find "${TMP_ROOT}" -maxdepth 1 -name 'sima_gst_registry_*.bin' -delete 2>/dev/null || true
+        find "${TMP_ROOT}" -maxdepth 1 -name 'sima-mpk-*' -type d -mmin +60 -exec rm -rf {} + 2>/dev/null || true
+        echo "Disk usage after cleanup:"
+        df -h "${TMP_ROOT}" || true
+    dependencies:
+      - core-python-pytest
+    timeout_sec: 120
