@@ -1,0 +1,318 @@
+metadata:
+  name: core-develop-bb5dab2-two-devkit-strict-ctest
+  labels:
+    suite: core-ci-strict
+    source_run: "26544517284"
+    source_job: "78201436004"
+
+source:
+  repository: shanguangzai/kerrigan-dispatcher-test
+
+setup:
+  per_devkit:
+    - id: prepare-core-strict-runtime
+      shell: |
+        set -eu
+        INSTALL_ROOT=/media/nvme/kerrigan-core-ci-develop-bb5dab219ee5
+        PACKAGE_SPEC=core@develop:bb5dab219ee5
+        VULCAN_ENV=stg
+        export HOME=/home/sima
+        export SIMA_CLI_CHECK_FOR_UPDATE=0
+        export PATH=/data/sima-cli/.venv/bin:/home/sima/.sima-cli/.venv/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}
+        run_privileged() {
+          if [ "$(id -u)" = "0" ]; then
+            "$@"
+          else
+            printf '%s\n' "${DEVKIT_PASSWORD:-edgeai}" | sudo -S -p '' "$@"
+          fi
+        }
+        recovery_step() {
+          label="$1"
+          shift
+          echo "[recovery] ${label}..."
+          if run_privileged "$@"; then
+            echo "[recovery] ${label} rc=0"
+          else
+            rc=$?
+            echo "[recovery] ${label} rc=${rc}"
+          fi
+        }
+        if [ -d /data/simaai/coprocessing ]; then
+          recovery_step "empty coprocessing directory" find /data/simaai/coprocessing -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
+        else
+          echo "[recovery] empty coprocessing skipped: directory not found /data/simaai/coprocessing"
+        fi
+        free_mb="$(df -Pm / | awk 'NR==2 {print $4}')"
+        if [ -n "${free_mb}" ] && [ "${free_mb}" -lt 500 ]; then
+          recovery_step "remove /tmp/sima_* for low root free space" sh -c 'rm -rf /tmp/sima_*'
+        else
+          echo "[recovery] /tmp cleanup skipped: root free space is ${free_mb:-unknown}MB (threshold 500MB)"
+        fi
+        recovery_step "remoteproc0 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "remoteproc1 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc1 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc0 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "remoteproc status" sh -c 'for rp in /sys/class/remoteproc/remoteproc0 /sys/class/remoteproc/remoteproc1; do echo "$rp: $(cat $rp/name) state=$(cat $rp/state)"; done'
+        recovery_step "init_mla_memory" /usr/bin/init_mla_memory.sh
+        recovery_step "restart simaai-appcomplex.service" systemctl restart simaai-appcomplex.service
+        recovery_step "restart simaai-pipeline-manager.service" systemctl restart simaai-pipeline-manager.service
+        recovery_step "restart rctd.service" systemctl restart rctd.service
+        if ! command -v sima-cli >/dev/null 2>&1; then
+          echo "sima-cli not found on devkit" >&2
+          exit 1
+        fi
+        echo "Installing ${PACKAGE_SPEC} from Vulcan env ${VULCAN_ENV} into ${INSTALL_ROOT}"
+        sima-cli neat install --env "${VULCAN_ENV}" --type all --install-dir "${INSTALL_ROOT}" "${PACKAGE_SPEC}"
+        EXTRAS="$(find "${INSTALL_ROOT}" -maxdepth 1 -type d -name 'sima-neat-*-Linux-extras' | sort | tail -1)"
+        if [ -z "${EXTRAS}" ]; then
+          echo "Unable to locate extras directory under ${INSTALL_ROOT}" >&2
+          exit 1
+        fi
+        EXTRAS_LIB_DIR="${EXTRAS}/lib/sima-neat"
+        EXTRAS_PREFIX="${EXTRAS}"
+        TEST_DIR="${EXTRAS_LIB_DIR}/tests"
+        TEST_ASSETS_ROOT="${EXTRAS_PREFIX}/share/sima-neat/test-assets"
+        if [ ! -d "${TEST_DIR}" ]; then
+          echo "Required installed test path missing: ${TEST_DIR}" >&2
+          exit 1
+        fi
+        find "${EXTRAS_LIB_DIR}" -type f -name CTestTestfile.cmake | sort > /tmp/kerrigan-core-ci-ctest-files.txt
+        if [ ! -s /tmp/kerrigan-core-ci-ctest-files.txt ]; then
+          echo "No CTestTestfile.cmake files found under ${EXTRAS_LIB_DIR}" >&2
+          exit 1
+        fi
+        while IFS= read -r f; do
+          sed -E -i \
+            -e "s|/[^\"[:space:]]*/build/tests/|${TEST_DIR}/|g" \
+            -e "s|/[^\"[:space:]]*/test\\.jpg|${TEST_ASSETS_ROOT}/test.jpg|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/gst-plugins|/usr/lib/aarch64-linux-gnu/neat/gst-plugins|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu/neat/runtime|/usr/lib/aarch64-linux-gnu/neat/runtime|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib/aarch64-linux-gnu|/usr/lib/aarch64-linux-gnu|g" \
+            -e "s|/opt/toolchain/aarch64/modalix/usr/lib|/usr/lib|g" \
+            "${f}"
+        done < /tmp/kerrigan-core-ci-ctest-files.txt
+        if grep -R -n -E '/build/tests/' "${EXTRAS_LIB_DIR}" --include CTestTestfile.cmake; then
+          echo "CTEST path rebasing incomplete; stale absolute paths remain." >&2
+          exit 1
+        fi
+        ctest --test-dir "${TEST_DIR}" -N --label-regex strict --label-exclude long -E '^(unit_dispatcher_watchdog_test)$' > /tmp/kerrigan-core-ci-strict-tests.txt
+        STRICT_COUNT="$(grep -c '^  Test #' /tmp/kerrigan-core-ci-strict-tests.txt || true)"
+        echo "prepared core strict CTest runtime from ${EXTRAS}; discovered ${STRICT_COUNT} strict tests"
+        # The core workflow runs runtime recovery again after install/rebase before tests.
+        recovery_step "remoteproc0 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "remoteproc1 stop" sh -c 'echo stop > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc1 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc1/state'
+        recovery_step "remoteproc0 start" sh -c 'echo start > /sys/class/remoteproc/remoteproc0/state'
+        recovery_step "init_mla_memory" /usr/bin/init_mla_memory.sh
+        recovery_step "restart simaai-appcomplex.service" systemctl restart simaai-appcomplex.service
+        recovery_step "restart simaai-pipeline-manager.service" systemctl restart simaai-pipeline-manager.service
+        recovery_step "restart rctd.service" systemctl restart rctd.service
+      timeout_sec: 900
+
+scheduling:
+  strategy: spread
+  min_devkits: 2
+  max_devkits: 2
+  max_parallel: 2
+  fail_fast: true
+  pools:
+    - default
+  capabilities:
+    board: modalix
+    os_type: elxr
+
+tasks:
+  - id: core-strict-ctest
+    type: ctest
+    test_dir: /media/nvme/kerrigan-core-ci-develop-bb5dab219ee5/sima-neat-2.0.0+develop.bb5dab2-Linux-extras/lib/sima-neat/tests
+    selectors:
+      - hybrid_graph_rtsp_resnet50_tput_test
+      - unit_caps_bridge_test
+      - unit_contract_compiler_boxdecode_test
+      - unit_contract_compiler_mla_test
+      - unit_contract_compiler_processcvu_test
+      - unit_contract_architecture_guard_test
+      - unit_contract_input_only_rules_test
+      - unit_contract_render_manifest_equivalence_test
+      - unit_contracts_test
+      - unit_boxdecode_render_manifest_from_model_test
+      - unit_model_route_retarget_helper_test
+      - unit_dequant_processcvu_contract_equivalence_test
+      - unit_dequant_node_fragment_test
+      - unit_detection_types_bbox_test
+      - unit_detessdequant_output_info_test
+      - unit_route_capability_mpk_static_contract_test
+      - unit_route_plan_detess_adapter_test
+      - unit_dispatcher_recovery_test
+      - unit_error_code_taxonomy_test
+      - unit_encoded_sample_test
+      - unit_env_util_profile_test
+      - unit_framestream_test
+      - unit_graph_compiler_determinism_test
+      - unit_graph_compiler_spec_validation_test
+      - unit_graph_compiler_topology_test
+      - unit_graph_join_bundle_test
+      - unit_graph_join_encoded_with_meta_test
+      - unit_graph_join_nodes_test
+      - unit_graph_stamp_frame_id_test
+      - unit_graph_backpressure_timeout_test
+      - unit_graph_run_option_validation_test
+      - unit_graph_stage_emitter_test
+      - unit_graph_stop_sequencing_test
+      - unit_graph_strict_sync_store_test
+      - unit_graph_strict_sync_test
+      - unit_genai_prompt_builder_test
+      - unit_genai_image_types_test
+      - unit_genai_audio_types_test
+      - unit_genai_header_compile_surface_test
+      - unit_genai_text_tensor_test
+      - unit_header_neat_compile_surface_test
+      - unit_verbose_options_surface_test
+      - unit_gst_data_adapter_edge_test
+      - unit_groups_test
+      - unit_gst_helpers_test
+      - unit_gst_init_guard_test
+      - unit_gst_video_meta_test
+      - unit_inputstream_dynamic_policy_matrix_test
+      - unit_input_policy_test
+      - unit_input_planner_semantics_test
+      - unit_preprocess_meta_validation_test
+      - unit_preprocess_meta_template_dynamic_test
+      - unit_preproc_contract_rules_test
+      - unit_inputstream_stop_timeout_detach_test
+      - unit_inputappsrc_stop_race_test
+      - unit_neatdecoder_keepalive_test
+      - unit_neatencoder_keepalive_test
+      - unit_neatmodel_async_api_test
+      - unit_neattensor_core_test
+      - unit_neattensor_cvmat_test
+      - unit_tensorbuffer_packed_runtime_parent_test
+      - unit_tensorbuffer_padded_hwc_gap_inference_test
+      - unit_tensorbuffer_runtime_contract_identity_overlay_test
+      - unit_tensorbuffer_strided_parent_view_materialize_test
+      - unit_modelpack_extract_test
+      - unit_asset_utils_readable_model_tar_test
+      - unit_model_infer_output_name_test
+      - unit_model_input_spec_contract_test
+      - unit_model_output_spec_contract_test
+      - unit_post_region_materialization_test
+      - unit_model_metadata_test
+      - unit_model_route_planner_test
+      - unit_resnet50_mla_handoff_segment_test
+      - unit_cast_fanout_contract_test
+      - unit_mla_boundary_output_contract_test
+      - unit_route_graph_slice_kernel_test
+      - unit_modelpack_mla_handoff_segment_test
+      - unit_model_stage_fragments_test
+      - unit_modalix_contract_preflight_test
+      - unit_mpk_graph_dump_test
+      - unit_mpk_fuse_sibling_pre_mla_test
+      - unit_mpk_contract_legacy_ingress_test
+      - unit_mla_elf_io_topology_test
+      - unit_mpk_loader_test
+      - unit_mpk_pipeline_adapter_test
+      - unit_outputspec_test
+      - unit_pcie_nodes_test
+      - pull_timeout_regression_test
+      - property_config_json_test
+      - property_pipeline_string_test
+      - unit_pipeline_internal_build_test
+      - unit_power_telemetry_test
+      - unit_policy_defaults_test
+      - unit_run_api_matrix_test
+      - unit_run_lifecycle_teardown_test
+      - unit_run_overflow_policy_parity_test
+      - unit_runtime_metrics_test
+      - unit_samplespec_test
+      - unit_sample_bundle_holder_test
+      - unit_session_api_surface_test
+      - unit_session_build_input_strategy_test
+      - unit_session_io_contract_test
+      - unit_session_naming_transform_test
+      - session_stage_contract_equivalence_test
+      - unit_simaai_guard_test
+      - unit_simaai_allocator_share_test
+      - unit_static_spec_builders_dtype_token_test
+      - unit_sima_boxdecode_static_contract_extractor_test
+      - unit_boxdecode_uses_upstream_cast_contract_test
+      - unit_sima_boxdecode_node_fragment_test
+      - unit_kernel200_envelope_guard_test
+      - unit_processcvu_binding_table_uses_runtime_outputs_test
+      - unit_processcvu_preproc_runtime_vs_exposed_outputs_test
+      - unit_stage_transform_rule_registry_test
+      - unit_sima_plugin_static_manifest_parse_test
+      - unit_sima_plugin_static_manifest_contract_test
+      - unit_sima_plugin_context_injection_test
+      - unit_sima_plugin_context_late_child_injection_test
+      - unit_sima_plugin_context_copy_test
+      - unit_sima_plugin_context_attach_lifetime_test
+      - unit_sima_plugin_context_replacement_test
+      - unit_sima_plugin_context_destroyed_pipeline_test
+      - unit_sima_plugins_test
+      - unit_pipeline_sequence_parse_test
+      - unit_processmla_model_load_failure_test
+      - unit_processmla_requires_explicit_output_contract_test
+      - unit_tensor_set_meta_route_contract_test
+      - unit_tensorbuffer_bind_preserve_source_view_test
+      - unit_tensorbuffer_publish_view_segment_name_precedence_test
+      - unit_sample_tensor_set_materialized_parent_offsets_test
+      - unit_yolov8_mla_handoff_segment_test
+      - unit_yolov8_contract_subset_test
+      - unit_agg_model_managed_no_standalone_json_test
+      - unit_tensor_list_api_test
+      - unit_tensor_conversion_policy_test
+      - unit_tensor_image_mapping_test
+      - unit_transport_shared_parent_input_test
+      - unit_transport_output_nodes_test
+      - unit_node_metadata_sender_test
+      - unit_nodes_test
+      - unit_plugin_failure_messages_test
+      - unit_video_sender_test
+      - unit_tensor_from_cv_mat_exactness_test
+      - unit_builder_test
+      - unit_appsrcimage_test
+      - unit_image_group_runtime_test
+      - unit_pipeline_io_test
+      - neat_tensor_device_placement_test
+      - appsrc_videoconvert_fakesink_test
+      - appsrc_videoscale_fakesink_test
+      - async_stream_test
+      - caps_negotiation_matrix_regression_test
+      - decoder_download_test
+      - decoder_drop_on_resolution_change_test
+      - decoder_dynamic_caps_test
+      - decoder_quality_compare_test
+      - decoder_visible_caps_test
+      - hybrid_graph_basic_test
+      - hybrid_graph_bundle_test
+      - graph_deterministic_routing_regression_test
+      - hybrid_graph_fanout_test
+      - hybrid_graph_multistream_scheduler_test
+      - hybrid_graph_stage_model_test
+      - output_appsink_policy_test
+      - gst_data_adapter_runtime_regression_test
+      - preproc_standalone_test
+      - session_naming_pipeline_integration_test
+      - session_rtsp_lifecycle_regression_test
+      - session_validate_report_regression_test
+      - stage_routing_regression_test
+      - metadata_sender_udp_integration_test
+      - udp_output_loopback_integration_test
+      - preproc_dynamic_renegotiate_test
+      - security_modelpack_matrix_test
+      - file_read_test
+      - async_yolov8_tput_test
+      - sync_yolov8_test
+      - sync_yolov8_test_detessdequant
+      - yolov8_variant_route_matrix_test
+      - preproc_yolov8_matrix_test
+      - graphpipes_yolo_metadata_sender_16stream_test
+      - model_resnet50_multi_test
+      - model_unique_names_test
+      - rtsp_pull_frame_test
+    args:
+      - --no-tests=error
+    env:
+      SIMA_YOLOV8_VARIANTS_BASE_URL: https://docs.sima.ai/pkg_downloads/SDK2.0.0/models/modalix
+      SIMA_MPK_EXTRACT_ROOT: /tmp/sima-mpk-kerrigan-core-ci
+    timeout_sec: 300
