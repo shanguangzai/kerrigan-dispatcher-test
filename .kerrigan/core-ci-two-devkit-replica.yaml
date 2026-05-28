@@ -286,6 +286,26 @@ setup:
             exit 1
           fi
         done
+        # Some core tests still discover fixtures by walking upward from the
+        # CTest working directory and expecting a source-tree shape. Provide
+        # that compatibility layout inside the installed runtime package.
+        if [ -f "${EXTRAS_PREFIX}/share/sima-neat/tests/CMakeLists.txt" ]; then
+          ln -sfn "${EXTRAS_PREFIX}/share/sima-neat/tests/CMakeLists.txt" "${EXTRAS_LIB_DIR}/CMakeLists.txt"
+        fi
+        if [ -f "${TEST_ASSETS_ROOT}/test.jpg" ]; then
+          ln -sfn "${TEST_ASSETS_ROOT}/test.jpg" "${EXTRAS_LIB_DIR}/test.jpg"
+        fi
+        mkdir -p "${TEST_DIR}/assets"
+        if [ -d "${EXTRAS_LIB_DIR}/test-assets/mpk" ]; then
+          ln -sfn "${EXTRAS_LIB_DIR}/test-assets/mpk" "${TEST_DIR}/assets/mpk"
+        elif [ -d "${EXTRAS_PREFIX}/share/sima-neat/tests/assets/mpk" ]; then
+          ln -sfn "${EXTRAS_PREFIX}/share/sima-neat/tests/assets/mpk" "${TEST_DIR}/assets/mpk"
+        fi
+        if [ -d "${EXTRAS_LIB_DIR}/test-assets/decoder" ]; then
+          ln -sfn "${EXTRAS_LIB_DIR}/test-assets/decoder" "${TEST_DIR}/assets/decoder"
+        elif [ -d "${EXTRAS_PREFIX}/share/sima-neat/tests/assets/decoder" ]; then
+          ln -sfn "${EXTRAS_PREFIX}/share/sima-neat/tests/assets/decoder" "${TEST_DIR}/assets/decoder"
+        fi
         find "${EXTRAS_LIB_DIR}" -type f -name CTestTestfile.cmake | sort > /tmp/kerrigan-core-ci-ctest-files.txt
         if [ ! -s /tmp/kerrigan-core-ci-ctest-files.txt ]; then
           echo "No CTestTestfile.cmake files found under ${EXTRAS_LIB_DIR}" >&2
