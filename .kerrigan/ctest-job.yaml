@@ -23,15 +23,14 @@ setup:
 
 scheduling:
   strategy: spread
-  min_devkits: 0
+  min_devkits: 1
   max_devkits: 4
   fail_fast: false
   pools:
-    - sim-pool
+    - default
   capabilities:
     board: modalix
     os_type: elxr
-    firmware: 2.1.0
 
 tasks:
   - id: ctest-core
